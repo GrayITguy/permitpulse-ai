@@ -1,36 +1,100 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PermitPulse AI
+
+AI-powered weekly permit leads for contractors.
+
+Phase 1 foundation is complete (data ingestion from 3 major sources, scoring, dashboard, feedback, and email digest).
+
+## Tech Stack
+
+- Next.js 16 + TypeScript
+- Supabase (PostgreSQL + auth)
+- Resend (email)
+- Tailwind
+- Jest + React Testing Library
+
+## Key Features (Phase 1)
+
+- Daily ingestion from Chicago, Austin, and Miami-Dade
+- Rule-based lead scoring with explanations
+- Dashboard showing top leads
+- Thumbs up/down feedback collection
+- Weekly email digest of best leads
+- Full monitoring via `ingestion_log` table
 
 ## Getting Started
 
-First, run the development server:
+### 1. Environment Variables
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Create `.env.local`:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+RESEND_API_KEY=your_resend_key
+CHICAGO_SOCRATA_APP_TOKEN=optional
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Database
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Run the migration:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+supabase db push
+```
 
-## Learn More
+Or apply `supabase/migrations/20260528130425_init_permitpulse_schema.sql`
 
-To learn more about Next.js, take a look at the following resources:
+### 3. Run the App
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm install
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Visit http://localhost:3000/dashboard
 
-## Deploy on Vercel
+### 4. Run Ingestion
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+# Via Node (example)
+node -e "
+const { runDailyIngestion } = require('./lib/orchestrator/ingestion');
+runDailyIngestion(100);
+"
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Or trigger via API route (to be added).
+
+## Project Structure
+
+```
+lib/
+  adapters/           # Chicago, Austin, Miami-Dade
+  orchestrator/       # Daily ingestion runner
+  scoring/            # Rule-based lead scoring
+  email/              # Weekly digest
+  schemas/            # PermitRecord + normalization
+
+app/
+  dashboard/          # Main lead view + feedback
+  api/feedback/       # Feedback collection
+```
+
+## Phase 1 Status
+
+- [x] Repository + DB schema
+- [x] Testing framework
+- [x] Normalization layer
+- [x] 3 data source adapters
+- [x] Ingestion orchestrator + monitoring
+- [x] Rule-based scoring
+- [x] Dashboard + feedback
+- [x] Email digest
+- [x] Basic E2E tests
+
+**Next phase ideas:** ML scoring, more cities, user accounts, lead export.
+
+## License
+
+MIT
